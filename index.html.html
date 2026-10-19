@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2026학년도 3학년 수학 대푯값 구하기 평가</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- html2pdf.js CDN for PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+        /* Disable text selection on inputs preview/exam paper */
+        input, textarea {
+            user-select: text !important;
+            -webkit-user-select: text !important;
+        }
+        /* Auto expanding textarea */
+        textarea {
+            resize: none;
+            overflow-y: hidden;
+        }
+        /* Printable clean layout for PDF */
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { background: white; color: black; }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen py-6 px-3 sm:px-6 lg:px-8" oncontextmenu="return false;" ondragstart="return false;" onselectstart="return false;">
+
+    <!-- Language Selector & Controls Bar -->
+    <div class="max-w-4xl mx-auto mb-4 flex flex-wrap justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-slate-200 gap-3 no-print">
+        <div class="flex items-center space-x-2 text-slate-700 font-medium">
+            <i class="fa-solid fa-graduation-cap text-indigo-600 text-xl"></i>
+            <span class="text-sm sm:text-base" id="top-title-nav">수학 논술형 평가 시스템</span>
+        </div>
+        
+        <div class="flex items-center space-x-3">
+            <!-- Language Dropdown -->
+            <label for="langSelect" class="sr-only">언어 선택</label>
+            <div class="relative">
+                <select id="langSelect" onchange="changeLanguage(this.value)" class="bg-slate-50 border border-slate-300 text-slate-700 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block p-2.5 pr-8 appearance-none cursor-pointer font-medium">
+                    <option value="ko" selected>🇰🇷 한국어</option>
+                    <option value="en">🇺🇸 English</option>
+                    <option value="zh">🇨🇳 中文</option>
+                    <option value="vi">🇻🇳 Tiếng Việt</option>
+                    <option value="ru">🇷🇺 Русский</option>
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-500">
+                    <i class="fa-solid fa-chevron-down text-xs"></i>
+                </div>
+            </div>
+
+            <!-- Russian Virtual Keyboard Toggle Button -->
+            <button id="ruKbdToggleBtn" onclick="toggleRussianKeyboard()" class="hidden bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-sm px-3 py-2 rounded-lg border border-indigo-200 transition items-center space-x-1">
+                <i class="fa-solid fa-keyboard"></i>
+                <span id="kbdBtnText">가상 키보드</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Exam Container -->
+    <main id="examContainer" class="max-w-4xl mx-auto bg-white rounded-xl shadow-md border border-slate-300 p-6 sm:p-10 transition-all">
+        
+        <!-- Document Header / Student Info Header -->
+        <header class="border-b-2 border-slate-800 pb-6 mb-8">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-6">
+                <div>
+                    <div class="inline-block bg-indigo-100 text-indigo-800 text-xs font-semibold px-2.5 py-1 rounded mb-2" id="badge-year">2026학년도 2학기</div>
+                    <h1 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight" id="doc-title">3학년 수학 대푯값 구하기 (20분간) 연습 1</h1>
+                </div>
+
+                <!-- Student Info Inputs -->
+                <div class="w-full md:w-auto bg-slate-50 p-3 rounded-lg border border-slate-200 flex flex-wrap sm:flex-nowrap gap-3 items-center">
+                    <div class="flex items-center space-x-2 w-full sm:w-auto">
+                        <label for="studentId" class="text-sm font-semibold text-slate-700 whitespace-nowrap" id="label-studentId">학번:</label>
+                        <input type="text" id="studentId" placeholder="예: 30101" class="w-full sm:w-28 bg-white border border-slate-300 rounded px-2.5 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                    </div>
+                    <div class="flex items-center space-x-2 w-full sm:w-auto">
+                        <label for="studentName" class="text-sm font-semibold text-slate-700 whitespace-nowrap" id="label-studentName">이름:</label>
+                        <input type="text" id="studentName" placeholder="성명" class="w-full sm:w-28 bg-white border border-slate-300 rounded px-2.5 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Guidelines Notice Box -->
+            <div class="bg-amber-50 border-l-4 border-amber-400 p-3.5 rounded-r-md text-xs sm:text-sm text-amber-900 no-print" id="guidelines-box">
+                <div class="font-bold mb-1 flex items-center gap-1.5" id="notice-heading">
+                    <i class="fa-solid fa-triangle-exclamation text-amber-600"></i> 유의사항 및 작성 안내
+                </div>
+                <ul class="list-disc list-inside space-x-0 space-y-0.5 text-amber-800">
+                    <li id="notice-1">제출 후에는 수정할 수 없습니다. 신중히 작성하세요.</li>
+                    <li id="notice-2">복사, 붙여넣기 및 우클릭 기능이 제한됩니다.</li>
+                    <li id="notice-3">모든 문항의 답안을 작성해야 제출이 가능합니다.</li>
+                </ul>
+            </div>
+        </header>
+
+        <!-- Exam Questions Form -->
+        <form id="assessmentForm" onsubmit="event.preventDefault(); confirmSubmission();" class="space-y-10">
+
+            <!-- QUESTION 1 -->
+            <section id="section-q1" class="p-4 rounded-lg transition-colors border border-transparent">
+                <div class="flex items-start justify-between gap-2 mb-3">
+                    <h2 class="text-base sm:text-lg font-bold text-slate-900 flex items-start gap-2">
+                        <span class="bg-slate-800 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs mt-0.5 flex-shrink-0">1</span>
+                        <span id="q1-text">중학생 10명이 한 달 동안 읽은 책의 권수 (단위: 권)에 대한 자료이다.</span>
+                    </h2>
+                    <span class="bg-slate-100 text-slate-700 text-xs font-semibold px-2 py-1 rounded whitespace-nowrap border border-slate-200" id="q1-score">(3점)</span>
+                </div>
+
+                <!-- Data Display Box -->
+                <div class="bg-slate-50 border border-slate-200 rounded-lg p-3 text-center my-3 font-mono text-base sm:text-lg tracking-wider font-semibold text-slate-800">
+                    7 &nbsp;&nbsp; 4 &nbsp;&nbsp; 2 &nbsp;&nbsp; 5 &nbsp;&nbsp; 5 &nbsp;&nbsp; 6 &nbsp;&nbsp; 2 &nbsp;&nbsp; 3 &nbsp;&nbsp; 5 &nbsp;&nbsp; 20
+                </div>
+
+                <!-- Sub Question 1-(1) -->
+                <div class="mt-4 ml-2 sm:ml-4 space-y-2">
+                    <p class="text-sm sm:text-base font-medium text-slate-800" id="q1-1-text">(1) 자료의 특징을 잘 나타낼 수 있는 대푯값을 고르시오.</p>
+                    <div class="flex flex-wrap gap-4 pt-1 pl-2">
+                        <label class="inline-flex items-center cursor-pointer">
+                            <input type="radio" name="q1_type" value="평균" class="w-4 h-4 text-indigo-600 border-slate-300 focus:ring-indigo-500">
+                            <span class="ml-2 text-sm text-slate-700" id="opt-avg-1">평균</span>
+                        </label>
+                        <label class="inline-flex items-center cursor-pointer">
+                            <input type="radio" name="q1_type" value="중앙값" class="w-4 h-4 text-indigo-600 border-slate-300 focus:ring-indigo-500">
+                            <span class="ml-2 text-sm text-slate-700" id="opt-med-1">중앙값</span>
+                        </label>
+                        <label class="inline-flex items-center cursor-pointer">
+                            <input type="radio" name="q1_type" value="최빈값" class="w-4 h-4 text-indigo-600 border-slate-300 focus:ring-indigo-500">
+                            <span class="ml-2 text-sm text-slate-700" id="opt-mode-1">최빈값</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Sub Question 1-(2) -->
+                <div class="mt-4 ml-2 sm:ml-4 space-y-2">
+                    <label for="q1_val" class="block text-sm sm:text-base font-medium text-slate-800" id="q1-2-text">(2) 위에서 선택한 대푯값을 구하시오.</label>
+                    <textarea id="q1_val" rows="2" placeholder="답안과 풀이 과정을 작성하세요..." oninput="autoExpand(this)" class="w-full p-3 bg-white border border-slate-300 rounded-md shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm leading-relaxed"></textarea>
+                </div>
+            </section>
+
+            <hr class="border-slate-200 my-6">
+
+            <!-- QUESTION 2 -->
+            <section id="section-q2" class="p-4 rounded-lg transition-colors border border-transparent">
+                <div class="flex items-start justify-between gap-2 mb-3">
+                    <h2 class="text-base sm:text-lg font-bold text-slate-900 flex items-start gap-2">
+                        <span class="bg-slate-800 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs mt-0.5 flex-shrink-0">2</span>
+                        <span id="q2-text">편의점에서 하루 동안 팔린 우유 10개의 용량 (단위: mL)에 대한 자료이다.</span>
+                    </h2>
+                    <span class="bg-slate-100 text-slate-700 text-xs font-semibold px-2 py-1 rounded whitespace-nowrap border border-slate-200" id="q2-score">(3점)</span>
+                </div>
+
+                <!-- Data Display Box -->
+                <div class="bg-slate-50 border border-slate-200 rounded-lg p-3 text-center my-3 font-mono text-base sm:text-lg tracking-wider font-semibold text-slate-800">
+                    180 &nbsp; 240 &nbsp; 300 &nbsp; 240 &nbsp; 500 &nbsp; 180 &nbsp; 240 &nbsp; 240 &nbsp; 240 &nbsp; 300
+                </div>
+
+                <!-- Sub Question 2-(1) -->
+                <div class="mt-4 ml-2 sm:ml-4 space-y-2">
+                    <p class="text-sm sm:text-base font-medium text-slate-800" id="q2-1-text">(1) 자료의 특징을 잘 나타낼 수 있는 대푯값을 고르시오.</p>
+                    <div class="flex flex-wrap gap-4 pt-1 pl-2">
+                        <label class="inline-flex items-center cursor-pointer">
+                            <input type="radio" name="q2_type" value="평균" class="w-4 h-4 text-indigo-600 border-slate-300 focus:ring-indigo-500">
+                            <span class="ml-2 text-sm text-slate-700" id="opt-avg-2">평균</span>
+                        </label>
+                        <label class="inline-flex items-center cursor-pointer">
+                            <input type="radio" name="q2_type" value="중앙값" class="w-4 h-4 text-indigo-600 border-slate-300 focus:ring-indigo-500">
+                            <span class="ml-2 text-sm text-slate-700" id="opt-med-2">중앙값</span>
+                        </label>
+                        <label class="inline-flex items-center cursor-pointer">
+                            <input type="radio" name="q2_type" value="최빈값" class="w-4 h-4 text-indigo-600 border-slate-300 focus:ring-indigo-500">
+                            <span class="ml-2 text-sm text-slate-700" id="opt-mode-2">최빈값</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Sub Question 2-(2) -->
+                <div class="mt-4 ml-2 sm:ml-4 space-y-2">
+                    <label for="q2_val" class="block text-sm sm:text-base font-medium text-slate-800" id="q2-2-text">(2) 위에서 선택한 대푯값을 구하시오.</label>
+                    <textarea id="q2_val" rows="2" placeholder="답안과 풀이 과정을 작성하세요..." oninput="autoExpand(this)" class="w-full p-3 bg-white border border-slate-300 rounded-md shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm leading-relaxed"></textarea>
+                </div>
+            </section>
+
+            <hr class="border-slate-200 my-6">
+
+            <!-- QUESTION 3 -->
+            <section id="section-q3" class="p-4 rounded-lg transition-colors border border-transparent">
+                <div class="flex items-start justify-between gap-2 mb-3">
+                    <h2 class="text-base sm:text-lg font-bold text-slate-900 flex items-start gap-2">
+                        <span class="bg-slate-800 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs mt-0.5 flex-shrink-0">3</span>
+                        <span id="q3-text">우리 반 학생 10명의 수학 점수 (단위: 점)에 대한 자료이다.</span>
+                    </h2>
+                    <span class="bg-slate-100 text-slate-700 text-xs font-semibold px-2 py-1 rounded whitespace-nowrap border border-slate-200" id="q3-score">(4점)</span>
+                </div>
+
+                <!-- Data Display Box -->
+                <div class="bg-slate-50 border border-slate-200 rounded-lg p-3 text-center my-3 font-mono text-base sm:text-lg tracking-wider font-semibold text-slate-800">
+                    80 &nbsp; 70 &nbsp; 95 &nbsp; 75 &nbsp; 99 &nbsp; 81 &nbsp; 80 &nbsp; 100 &nbsp; 92 &nbsp; 68
+                </div>
+
+                <!-- Sub Question 3-(1) -->
+                <div class="mt-4 ml-2 sm:ml-4 space-y-2">
+                    <p class="text-sm sm:text-base font-medium text-slate-800" id="q3-1-text">(1) 자료의 특징을 잘 나타낼 수 있는 대푯값을 고르시오.</p>
+                    <div class="flex flex-wrap gap-4 pt-1 pl-2">
+                        <label class="inline-flex items-center cursor-pointer">
+                            <input type="radio" name="q3_type" value="평균" class="w-4 h-4 text-indigo-600 border-slate-300 focus:ring-indigo-500">
+                            <span class="ml-2 text-sm text-slate-700" id="opt-avg-3">평균</span>
+                        </label>
+                        <label class="inline-flex items-center cursor-pointer">
+                            <input type="radio" name="q3_type" value="중앙값" class="w-4 h-4 text-indigo-600 border-slate-300 focus:ring-indigo-500">
+                            <span class="ml-2 text-sm text-slate-700" id="opt-med-3">중앙값</span>
+                        </label>
+                        <label class="inline-flex items-center cursor-pointer">
+                            <input type="radio" name="q3_type" value="최빈값" class="w-4 h-4 text-indigo-600 border-slate-300 focus:ring-indigo-500">
+                            <span class="ml-2 text-sm text-slate-700" id="opt-mode-3">최빈값</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Sub Question 3-(2) -->
+                <div class="mt-4 ml-2 sm:ml-4 space-y-2">
+                    <label for="q3_val" class="block text-sm sm:text-base font-medium text-slate-800" id="q3-2-text">(2) 위에서 선택한 대푯값을 구하시오.</label>
+                    <textarea id="q3_val" rows="2" placeholder="답안과 풀이 과정을 작성하세요..." oninput="autoExpand(this)" class="w-full p-3 bg-white border border-slate-300 rounded-md shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm leading-relaxed"></textarea>
+                </div>
+            </section>
+
+            <!-- Submit Button Section -->
+            <div class="pt-6 border-t border-slate-200 flex justify-end no-print">
+                <button type="submit" id="btn-submit" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 px-8 rounded-lg shadow-md transition duration-150 ease-in-out flex items-center justify-center space-x-2 text-base">
+                    <i class="fa-solid fa-paper-plane" id="btn-submit-icon"></i>
+                    <span id="btn-submit-text">평가 제출하기</span>
+                </button>
+            </div>
+        </form>
+    </main>
+
+    <!-- Russian On-Screen Virtual Keyboard Container -->
+    <div id="russianKeyboard" class="fixed bottom-0 left-0 right-0 bg-slate-800 text-white p-3 shadow-2xl z-50 transform translate-y-full transition-transform duration-300 ease-in-out border-t-2 border-indigo-500 no-print">
+        <div class="max-w-4xl mx-auto">
+            <div class="flex justify-between items-center mb-2 pb-1 border-b border-slate-700">
+                <span class="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
+                    <i class="fa-solid fa-keyboard text-indigo-400"></i> 러시아어 가상 키보드 (Русская клавиатура)
+                </span>
+                <button onclick="toggleRussianKeyboard(false)" class="text-slate-400 hover:text-white text-sm px-2">
+                    <i class="fa-solid fa-xmark"></i> 닫기
+                </button>
+            </div>
+            <!-- Keyboard Layout -->
+            <div class="space-y-1.5 text-center text-sm font-semibold select-none">
+                <div class="flex justify-center gap-1">
+                    <button onclick="insertKbdChar('ё')" class="kbd-key">ё</button>
+                    <button onclick="insertKbdChar('1')" class="kbd-key">1</button>
+                    <button onclick="insertKbdChar('2')" class="kbd-key">2</button>
+                    <button onclick="insertKbdChar('3')" class="kbd-key">3</button>
+                    <button onclick="insertKbdChar('4')" class="kbd-key">4</button>
+                    <button onclick="insertKbdChar('5')" class="kbd-key">5</button>
+                    <button onclick="insertKbdChar('6')" class="kbd-key">6</button>
+                    <button onclick="insertKbdChar('7')" class="kbd-key">7</button>
+                    <button onclick="insertKbdChar('8')" class="kbd-key">8</button>
+                    <button onclick="insertKbdChar('9')" class="kbd-key">9</button>
+                    <button onclick="insertKbdChar('0')" class="kbd-key">0</button>
+                    <button onclick="backspaceKbdChar()" class="kbd-key bg-slate-700 px-3"><i class="fa-solid fa-backspace"></i></button>
+                </div>
+                <div class="flex justify-center gap-1">
+                    <button onclick="insertKbdChar('й')" class="kbd-key">й</button>
+                    <button onclick="insertKbdChar('ц')" class="kbd-key">ц</button>
+                    <button onclick="insertKbdChar('у')" class="kbd-key">у</button>
+                    <button onclick="insertKbdChar('к')" class="kbd-key">к</button>
+                    <button onclick="insertKbdChar('е')" class="kbd-key">е</button>
+                    <button onclick="insertKbdChar('н')" class="kbd-key">н</button>
+                    <button onclick="insertKbdChar('г')" class="kbd-key">г</button>
+                    <button onclick="insertKbdChar('ш')" class="kbd-key">ш</button>
+                    <button onclick="insertKbdChar('щ')" class="kbd-key">щ</button>
+                    <button onclick="insertKbdChar('з')" class="kbd-key">з</button>
+                    <button onclick="insertKbdChar('х')" class="kbd-key">х</button>
+                    <button onclick="insertKbdChar('ъ')" class="kbd-key">ъ</button>
+                </div>
+                <div class="flex justify-center gap-1">
+                    <button onclick="insertKbdChar('ф')" class="kbd-key">ф</button>
+                    <button onclick="insertKbdChar('ы')" class="kbd-key">ы</button>
+                    <button onclick="insertKbdChar('в')" class="kbd-key">в</button>
+                    <button onclick="insertKbdChar('а')" class="kbd-key">а</button>
+                    <button onclick="insertKbdChar('п')" class="kbd-key">п</button>
+                    <button onclick="insertKbdChar('р')" class="kbd-key">р</button>
+                    <button onclick="insertKbdChar('о')" class="kbd-key">о</button>
+                    <button onclick="insertKbdChar('л')" class="kbd-key">л</button>
+                    <button onclick="insertKbdChar('д')" class="kbd-key">д</button>
+                    <button onclick="insertKbdChar('ж')" class="kbd-key">ж</button>
+                    <button onclick="insertKbdChar('э')" class="kbd-key">э</button>
+                </div>
+                <div class="flex justify-center gap-1">
+                    <button onclick="insertKbdChar('я')" class="kbd-key">я</button>
+                    <button onclick="insertKbdChar('ч')" class="kbd-key">ч</button>
+                    <button onclick="insertKbdChar('с')" class="kbd-key">с</button>
+                    <button onclick="insertKbdChar('м')" class="kbd-key">м</button>
+                    <button onclick="insertKbdChar('и')" class="kbd-key">и</button>
+                    <button onclick="insertKbdChar('т')" class="kbd-key">т</button>
+                    <button onclick="insertKbdChar('ь')" class="kbd-key">ь</button>
+                    <button onclick="insertKbdChar('б')" class="kbd-key">б</button>
+                    <button onclick="insertKbdChar('ю')" class="kbd-key">ю</button>
+                    <button onclick="insertKbdChar(' ')" class="kbd-key w-32 bg-slate-700">Space</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Modal Dialogs -->
+    <div id="modalOverlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div id="modalBox" class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 transform transition-all scale-95 opacity-0">
+            <div id="modalIcon" class="w-12 h-12 rounded-full flex items-center justify-center mb-4 text-2xl"></div>
+            <h3 id="modalTitle" class="text-lg font-bold text-slate-900 mb-2"></h3>
+            <p id="modalMessage" class="text-sm text-slate-600 mb-6 leading-relaxed"></p>
+            <div id="modalActions" class="flex justify-end space-x-3"></div>
+        </div>
+    </div>
+
+    <!-- Final Submission Complete Overlay -->
+    <div id="submittedScreen" class="fixed inset-0 bg-slate-900 z-[100] hidden flex flex-col items-center justify-center p-6 text-center text-white">
+        <div class="w-20 h-20 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center text-4xl mb-6 ring-8 ring-emerald-500/10">
+            <i class="fa-solid fa-circle-check"></i>
+        </div>
+        <h1 class="text-3xl sm:text-4xl font-extrabold mb-3 tracking-tight" id="complete-title">제출이 완료되었습니다.</h1>
+        <p class="text-slate-400 max-w-md text-sm sm:text-base leading-relaxed mb-8" id="complete-desc">
+            답안이 성공적으로 제출되어 구글 드라이브에 저장되었습니다. 수고하셨습니다.
+        </p>
+        <div class="bg-slate-800 border border-slate-700 rounded-lg p-4 text-xs text-slate-400 max-w-sm w-full">
+            <span class="block font-semibold text-slate-300 mb-1" id="complete-notice-head">안내</span>
+            <span id="complete-notice-body">창을 닫거나 브라우저를 종료하셔도 좋습니다.</span>
+        </div>
+    </div>
+
+    <!-- Keyboard Key Styling -->
+    <style>
+        .kbd-key {
+            background-color: #334155;
+            color: #f8fafc;
+            border: 1px solid #475569;
+            border-radius: 0.375rem;
+            padding: 0.5rem 0.6rem;
+            min-width: 2.2rem;
+            font-size: 0.875rem;
+            transition: background-color 0.1s, transform 0.05s;
+        }
+        .kbd-key:hover { background-color: #475569; }
+        .kbd-key:active { background-color: #64748b; transform: scale(0.95); }
+    </style>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // Google Apps Script Deploy URL (배포한 Apps Script URL로 변경하세요)
+        const APPS_SCRIPT_URL = "YOUR_APPS_SCRIPT_WEB_APP_URL_HERE";
+
+        // Anti-Cheating Restrictions (Block copy, paste, cut, contextmenu, shortcuts)
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.addEventListener('copy', e => e.preventDefault());
+        document.addEventListener('paste', e => e.preventDefault());
+        document.addEventListener('cut', e => e.preventDefault());
+        document.addEventListener('keydown', e => {
+            if ((e.ctrlKey || e.metaKey) && ['c', 'v', 'x', 'a', 'p', 's'].includes(e.key.toLowerCase())) {
+                e.preventDefault();
+            }
+        });
+
+        // Active active textarea focus for virtual Russian keyboard insertion
+        let activeFocusedInput = null;
+        document.querySelectorAll('input[type="text"], textarea').forEach(el => {
+            el.addEventListener('focus', () => { activeFocusedInput = el; });
+        });
+
+        // Auto expanding textarea handler
+        function autoExpand(textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = (textarea.scrollHeight) + 'px';
+        }
+
+        // Language Translation Dictionary
+        const i18n = {
+            ko: {
+                topTitle: "수학 논술형 평가 시스템",
+                badgeYear: "2026학년도 2학기",
+                docTitle: "3학년 수학 대푯값 구하기 (20분간) 연습 1",
+                labelStudentId: "학번:",
+                labelStudentName: "이름:",
+                noticeHeading: "유의사항 및 작성 안내",
+                notice1: "제출 후에는 수정할 수 없습니다. 신중히 작성하세요.",
+                notice2: "복사, 붙여넣기 및 우클릭 기능이 제한됩니다.",
+                notice3: "모든 문항의 답안을 작성해야 제출이 가능합니다.",
+                q1Text: "중학생 10명이 한 달 동안 읽은 책의 권수 (단위: 권)에 대한 자료이다.",
+                q2Text: "편의점에서 하루 동안 팔린 우유 10개의 용량 (단위: mL)에 대한 자료이다.",
+                q3Text: "우리 반 학생 10명의 수학 점수 (단위: 점)에 대한 자료이다.",
+                subQ1: "(1) 자료의 특징을 잘 나타낼 수 있는 대푯값을 고르시오.",
+                subQ2: "(2) 위에서 선택한 대푯값을 구하시오.",
+                optAvg: "평균",
+                optMed: "중앙값",
+                optMode: "최빈값",
+                score3: "(3점)",
+                score4: "(4점)",
+                btnSubmit: "평가 제출하기",
+                placeholderAnswer: "답안과 풀이 과정을 작성하세요...",
+                alertIncompleteTitle: "작성 미완료 항목 안내",
+                alertIncompleteMsg: "모든 필수 항목을 입력해주세요. 작성하지 않은 첫 번째 항목으로 이동합니다.",
+                confirmSubmitTitle: "최종 제출 확인",
+                confirmSubmitMsg: "제출 후에는 답안을 수정할 수 없습니다. 정말로 제출하시겠습니까?",
+                completeTitle: "제출이 완료되었습니다.",
+                completeDesc: "답안이 성공적으로 제출되어 구글 드라이브에 저장되었습니다. 수고하셨습니다.",
+                completeHead: "안내",
+                completeBody: "창을 닫거나 브라우저를 종료하셔도 좋습니다.",
+                btnConfirm: "제출하기",
+                btnCancel: "취소",
+                ruKbdBtn: "가상 키보드"
+            },
+            en: {
+                topTitle: "Math Descriptive Assessment System",
+                badgeYear: "2nd Semester, Academic Year 2026",
+                docTitle: "Grade 9 Mathematics: Representative Values (20 Min) Practice 1",
+                labelStudentId: "Student ID:",
+                labelStudentName: "Name:",
+                noticeHeading: "Instructions & Guidelines",
+                notice1: "Answers cannot be edited after submission. Please answer carefully.",
+                notice2: "Copy, paste, and right-click functions are restricted.",
+                notice3: "All questions must be answered to submit.",
+                q1Text: "Data on the number of books read in a month by 10 middle school students (Unit: books).",
+                q2Text: "Data on the volume of 10 milk bottles sold at a convenience store in one day (Unit: mL).",
+                q3Text: "Data on the math scores of 10 students in our class (Unit: points).",
+                subQ1: "(1) Choose the measure of central tendency that best represents the characteristics of the data.",
+                subQ2: "(2) Calculate the measure of central tendency chosen above.",
+                optAvg: "Mean",
+                optMed: "Median",
+                optMode: "Mode",
+                score3: "(3 pts)",
+                score4: "(4 pts)",
+                btnSubmit: "Submit Assessment",
+                placeholderAnswer: "Type your answer and solution process here...",
+                alertIncompleteTitle: "Incomplete Input",
+                alertIncompleteMsg: "Please complete all fields. Scrolling to the first missing field.",
+                confirmSubmitTitle: "Confirm Submission",
+                confirmSubmitMsg: "You cannot modify your submission afterwards. Are you sure you want to submit?",
+                completeTitle: "Submission Complete",
+                completeDesc: "Your answers have been successfully submitted and saved to Google Drive.",
+                completeHead: "Notice",
+                completeBody: "You may now close this window or browser.",
+                btnConfirm: "Submit",
+                btnCancel: "Cancel",
+                ruKbdBtn: "Virtual Keyboard"
+            },
+            zh: {
+                topTitle: "数学叙述型评价系统",
+                badgeYear: "2026学年度 第二학期",
+                docTitle: "初三数学 代表值计算（20分钟）练习 1",
+                labelStudentId: "学号:",
+                labelStudentName: "姓名:",
+                noticeHeading: "注意事项与填写指南",
+                notice1: "提交后无法修改，请谨慎填写。",
+                notice2: "禁止复制、粘贴及右键功能。",
+                notice3: "必须回答所有问题才能提交。",
+                q1Text: "10名初中生一月内阅读图书数量的数据（单位：本）。",
+                q2Text: "便利店一天内售出的10盒牛奶容量的数据（单位：mL）。",
+                q3Text: "我们班10名学生的数学成绩数据（单位：分）。",
+                subQ1: "(1) 请选择最能体现数据特征的代表值。",
+                subQ2: "(2) 计算上面选择的代表值。",
+                optAvg: "平均数",
+                optMed: "中位数",
+                optMode: "众数",
+                score3: "(3分)",
+                score4: "(4分)",
+                btnSubmit: "提交评价",
+                placeholderAnswer: "请输入答案及解题过程...",
+                alertIncompleteTitle: "未填写项提示",
+                alertIncompleteMsg: "请填写所有必填项。将跳转至第一个未填写的项目。",
+                confirmSubmitTitle: "确认提交",
+                confirmSubmitMsg: "提交后将无法修改答案。确定要提交吗？",
+                completeTitle: "提交完成",
+                completeDesc: "您的答案已成功提交并保存至Google Drive。",
+                completeHead: "提示",
+                completeBody: "您现在可以关闭此窗口或浏览器。",
+                btnConfirm: "提交",
+                btnCancel: "取消",
+                ruKbdBtn: "虚拟键盘"
+            },
+            vi: {
+                topTitle: "Hệ thống đánh giá tự luận Toán học",
+                badgeYear: "Học kỳ 2, Năm học 2026",
+                docTitle: "Toán lớp 9: Tìm giá trị đại diện (20 phút) Luyện tập 1",
+                labelStudentId: "Mã số HS:",
+                labelStudentName: "Họ và tên:",
+                noticeHeading: "Lưu ý và Hướng dẫn",
+                notice1: "Không thể chỉnh sửa sau khi nộp bài. Vui lòng làm bài cẩn thận.",
+                notice2: "Chức năng sao chép, dán và nhấp chuột phải bị hạn chế.",
+                notice3: "Phải trả lời tất cả các câu hỏi mới có thể nộp bài.",
+                q1Text: "Dữ liệu về số sách 10 học sinh trung học đọc trong một tháng (Đơn vị: quyển).",
+                q2Text: "Dữ liệu về dung tích 10 hộp sữa bán ra tại cửa hàng tiện lợi trong một ngày (Đơn vị: mL).",
+                q3Text: "Dữ liệu về điểm môn Toán của 10 học sinh trong lớp (Đơn vị: điểm).",
+                subQ1: "(1) Chọn giá trị đại diện thể hiện rõ nhất đặc điểm của dữ liệu.",
+                subQ2: "(2) Tính giá trị đại diện đã chọn ở trên.",
+                optAvg: "Trung bình",
+                optMed: "Trung vị",
+                optMode: "Yếu vị (Mode)",
+                score3: "(3 điểm)",
+                score4: "(4 điểm)",
+                btnSubmit: "Nộp bài đánh giá",
+                placeholderAnswer: "Nhập câu trả lời và lời giải...",
+                alertIncompleteTitle: "Chưa hoàn thành bài làm",
+                alertIncompleteMsg: "Vui lòng điền đầy đủ tất cả các mục. Tự động chuyển đến vị trí còn thiếu.",
+                confirmSubmitTitle: "Xác nhận nộp bài",
+                confirmSubmitMsg: "Sau khi nộp bài, bạn không thể sửa lại. Bạn có chắc chắn muốn nộp không?",
+                completeTitle: "Đã nộp bài thành công",
+                completeDesc: "Bài làm của bạn đã được gửi thành công và lưu vào Google Drive.",
+                completeHead: "Thông báo",
+                completeBody: "Bạn có thể đóng cửa sổ hoặc trình duyệt này.",
+                btnConfirm: "Nộp bài",
+                btnCancel: "Hủy",
+                ruKbdBtn: "Bàn phím ảo"
+            },
+            ru: {
+                topTitle: "Система письменной оценки по математике",
+                badgeYear: "2-й семестр 2026 учебного года",
+                docTitle: "Математика 9 класс: Показатели центральной тенденции (20 мин) Практика 1",
+                labelStudentId: "№ ученика:",
+                labelStudentName: "Имя:",
+                noticeHeading: "Указания и правила",
+                notice1: "После отправки редактирование невозможно. Заполняйте внимательно.",
+                notice2: "Копирование, вставка и контекстное меню отключены.",
+                notice3: "Для отправки необходимо ответить на все вопросы.",
+                q1Text: "Данные о количестве книг, прочитанных 10 учениками за месяц (ед.: книг).",
+                q2Text: "Данные об объеме 10 упаковок молока, проданных в магазине за день (ед.: мл).",
+                q3Text: "Данные о баллах по математике 10 учеников нашего класса (ед.: баллы).",
+                subQ1: "(1) Выберите показатель, наиболее точно отражающий особенности данных.",
+                subQ2: "(2) Найдите выбранный выше показатель.",
+                optAvg: "Среднее",
+                optMed: "Медиана",
+                optMode: "Мода",
+                score3: "(3 балла)",
+                score4: "(4 балла)",
+                btnSubmit: "Отправить работу",
+                placeholderAnswer: "Введите ответ и ход решения...",
+                alertIncompleteTitle: "Не заполнено",
+                alertIncompleteMsg: "Пожалуйста, заполните все поля. Переход к первому незаполненному полю.",
+                confirmSubmitTitle: "Подтверждение отправки",
+                confirmSubmitMsg: "Вы не сможете изменить ответы после отправки. Вы уверены, что хотите отправить?",
+                completeTitle: "Отправка завершена",
+                completeDesc: "Ваши ответы успешно отправлены и сохранены на Google Диск.",
+                completeHead: "Информация",
+                completeBody: "Вы можете закрыть это окно или браузер.",
+                btnConfirm: "Отправить",
+                btnCancel: "Отмена",
+                ruKbdBtn: "Экранная клавиатура"
+            }
+        };
+
+        // Switch Language Dynamic UI Update
+        function changeLanguage(lang) {
+            const data = i18n[lang] || i18n.ko;
+
+            document.getElementById('top-title-nav').textContent = data.topTitle;
+            document.getElementById('badge-year').textContent = data.badgeYear;
+            document.getElementById('doc-title').textContent = data.docTitle;
+            document.getElementById('label-studentId').textContent = data.labelStudentId;
+            document.getElementById('label-studentName').textContent = data.labelStudentName;
+            
+            document.getElementById('notice-heading').innerHTML = `<i class="fa-solid fa-triangle-exclamation text-amber-600"></i> ${data.noticeHeading}`;
+            document.getElementById('notice-1').textContent = data.notice1;
+            document.getElementById('notice-2').textContent = data.notice2;
+            document.getElementById('notice-3').textContent = data.notice3;
+
+            document.getElementById('q1-text').textContent = data.q1Text;
+            document.getElementById('q2-text').textContent = data.q2Text;
+            document.getElementById('q3-text').textContent = data.q3Text;
+
+            document.getElementById('q1-1-text').textContent = data.subQ1;
+            document.getElementById('q2-1-text').textContent = data.subQ1;
+            document.getElementById('q3-1-text').textContent = data.subQ1;
+
+            document.getElementById('q1-2-text').textContent = data.subQ2;
+            document.getElementById('q2-2-text').textContent = data.subQ2;
+            document.getElementById('q3-2-text').textContent = data.subQ2;
+
+            document.querySelectorAll('#opt-avg-1, #opt-avg-2, #opt-avg-3').forEach(el => el.textContent = data.optAvg);
+            document.querySelectorAll('#opt-med-1, #opt-med-2, #opt-med-3').forEach(el => el.textContent = data.optMed);
+            document.querySelectorAll('#opt-mode-1, #opt-mode-2, #opt-mode-3').forEach(el => el.textContent = data.optMode);
+
+            document.querySelectorAll('#q1-score, #q2-score').forEach(el => el.textContent = data.score3);
+            document.getElementById('q3-score').textContent = data.score4;
+
+            document.getElementById('btn-submit-text').textContent = data.btnSubmit;
+            document.querySelectorAll('textarea').forEach(el => el.placeholder = data.placeholderAnswer);
+
+            document.getElementById('complete-title').textContent = data.completeTitle;
+            document.getElementById('complete-desc').textContent = data.completeDesc;
+            document.getElementById('complete-notice-head').textContent = data.completeHead;
+            document.getElementById('complete-notice-body').textContent = data.completeBody;
+
+            document.getElementById('kbdBtnText').textContent = data.ruKbdBtn;
+
+            // Show Russian keyboard toggle button if Russian is selected
+            const ruBtn = document.getElementById('ruKbdToggleBtn');
+            if (lang === 'ru') {
+                ruBtn.classList.remove('hidden');
+                ruBtn.classList.add('flex');
+            } else {
+                ruBtn.classList.add('hidden');
+                ruBtn.classList.remove('flex');
+                toggleRussianKeyboard(false);
+            }
+        }
+
+        // Russian Virtual Keyboard Toggle & Input Handler
+        let isKbdVisible = false;
+        function toggleRussianKeyboard(forceState) {
+            const kbd = document.getElementById('russianKeyboard');
+            isKbdVisible = forceState !== undefined ? forceState : !isKbdVisible;
+            if (isKbdVisible) {
+                kbd.classList.remove('translate-y-full');
+            } else {
+                kbd.classList.add('translate-y-full');
+            }
+        }
+
+        function insertKbdChar(char) {
+            if (!activeFocusedInput) {
+                activeFocusedInput = document.getElementById('q1_val');
+            }
+            activeFocusedInput.focus();
+            const start = activeFocusedInput.selectionStart;
+            const end = activeFocusedInput.selectionEnd;
+            const val = activeFocusedInput.value;
+            activeFocusedInput.value = val.substring(0, start) + char + val.substring(end);
+            activeFocusedInput.selectionStart = activeFocusedInput.selectionEnd = start + char.length;
+            if (activeFocusedInput.tagName === 'TEXTAREA') {
+                autoExpand(activeFocusedInput);
+            }
+        }
+
+        function backspaceKbdChar() {
+            if (!activeFocusedInput) return;
+            activeFocusedInput.focus();
+            const start = activeFocusedInput.selectionStart;
+            const end = activeFocusedInput.selectionEnd;
+            const val = activeFocusedInput.value;
+            if (start === end && start > 0) {
+                activeFocusedInput.value = val.substring(0, start - 1) + val.substring(end);
+                activeFocusedInput.selectionStart = activeFocusedInput.selectionEnd = start - 1;
+            } else if (start !== end) {
+                activeFocusedInput.value = val.substring(0, start) + val.substring(end);
+                activeFocusedInput.selectionStart = activeFocusedInput.selectionEnd = start;
+            }
+            if (activeFocusedInput.tagName === 'TEXTAREA') {
+                autoExpand(activeFocusedInput);
+            }
+        }
+
+        // Custom Modal Functionality
+        function showModal({ title, message, iconType, primaryBtnText, primaryBtnAction, secondaryBtnText }) {
+            const overlay = document.getElementById('modalOverlay');
+            const box = document.getElementById('modalBox');
+            const titleEl = document.getElementById('modalTitle');
+            const msgEl = document.getElementById('modalMessage');
+            const iconEl = document.getElementById('modalIcon');
+            const actionsEl = document.getElementById('modalActions');
+
+            titleEl.textContent = title;
+            msgEl.textContent = message;
+
+            if (iconType === 'warning') {
+                iconEl.className = 'w-12 h-12 rounded-full flex items-center justify-center mb-4 text-2xl bg-amber-100 text-amber-600';
+                iconEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
+            } else if (iconType === 'confirm') {
+                iconEl.className = 'w-12 h-12 rounded-full flex items-center justify-center mb-4 text-2xl bg-indigo-100 text-indigo-600';
+                iconEl.innerHTML = '<i class="fa-solid fa-circle-question"></i>';
+            }
+
+            actionsEl.innerHTML = '';
+            if (secondaryBtnText) {
+                const secBtn = document.createElement('button');
+                secBtn.className = 'px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 rounded-lg hover:bg-slate-200 transition';
+                secBtn.textContent = secondaryBtnText;
+                secBtn.onclick = closeModal;
+                actionsEl.appendChild(secBtn);
+            }
+
+            const priBtn = document.createElement('button');
+            priBtn.className = 'px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition';
+            priBtn.textContent = primaryBtnText;
+            priBtn.onclick = () => {
+                closeModal();
+                if (primaryBtnAction) primaryBtnAction();
+            };
+            actionsEl.appendChild(priBtn);
+
+            overlay.classList.remove('hidden');
+            setTimeout(() => {
+                box.classList.remove('scale-95', 'opacity-0');
+                box.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closeModal() {
+            const overlay = document.getElementById('modalOverlay');
+            const box = document.getElementById('modalBox');
+            box.classList.remove('scale-100', 'opacity-100');
+            box.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                overlay.classList.add('hidden');
+            }, 200);
+        }
+
+        // Assessment Validation & Form Handler
+        function confirmSubmission() {
+            const currentLang = document.getElementById('langSelect').value;
+            const langData = i18n[currentLang] || i18n.ko;
+
+            // Clear highlight borders
+            document.querySelectorAll('section, input[type="text"]').forEach(el => {
+                el.classList.remove('border-red-500', 'bg-red-50/30');
+            });
+
+            // 1. Check Student Info
+            const studentId = document.getElementById('studentId').value.trim();
+            const studentName = document.getElementById('studentName').value.trim();
+
+            if (!studentId) {
+                highlightAndFocus(document.getElementById('studentId'), langData);
+                return;
+            }
+            if (!studentName) {
+                highlightAndFocus(document.getElementById('studentName'), langData);
+                return;
+            }
+
+            // 2. Check Question 1
+            const q1Type = document.querySelector('input[name="q1_type"]:checked');
+            const q1Val = document.getElementById('q1_val').value.trim();
+            if (!q1Type || !q1Val) {
+                highlightSection('section-q1', !q1Type ? null : document.getElementById('q1_val'), langData);
+                return;
+            }
+
+            // 3. Check Question 2
+            const q2Type = document.querySelector('input[name="q2_type"]:checked');
+            const q2Val = document.getElementById('q2_val').value.trim();
+            if (!q2Type || !q2Val) {
+                highlightSection('section-q2', !q2Type ? null : document.getElementById('q2_val'), langData);
+                return;
+            }
+
+            // 4. Check Question 3
+            const q3Type = document.querySelector('input[name="q3_type"]:checked');
+            const q3Val = document.getElementById('q3_val').value.trim();
+            if (!q3Type || !q3Val) {
+                highlightSection('section-q3', !q3Type ? null : document.getElementById('q3_val'), langData);
+                return;
+            }
+
+            // Prompt Confirmation
+            showModal({
+                title: langData.confirmSubmitTitle,
+                message: langData.confirmSubmitMsg,
+                iconType: 'confirm',
+                primaryBtnText: langData.btnConfirm,
+                secondaryBtnText: langData.btnCancel,
+                primaryBtnAction: executeFinalSubmission
+            });
+        }
+
+        function highlightAndFocus(element, langData) {
+            element.classList.add('border-red-500');
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            element.focus();
+            showModal({
+                title: langData.alertIncompleteTitle,
+                message: langData.alertIncompleteMsg,
+                iconType: 'warning',
+                primaryBtnText: '확인'
+            });
+        }
+
+        function highlightSection(sectionId, focusTarget, langData) {
+            const sec = document.getElementById(sectionId);
+            sec.classList.add('border-red-500', 'bg-red-50/30');
+            sec.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            if (focusTarget) focusTarget.focus();
+            showModal({
+                title: langData.alertIncompleteTitle,
+                message: langData.alertIncompleteMsg,
+                iconType: 'warning',
+                primaryBtnText: '확인'
+            });
+        }
+
+        // Final PDF Export & Upload to Google Drive
+        async function executeFinalSubmission() {
+            const submitBtn = document.getElementById('btn-submit');
+            const submitBtnText = document.getElementById('btn-submit-text');
+            const submitBtnIcon = document.getElementById('btn-submit-icon');
+
+            // 버튼 로딩 상태 표시
+            submitBtn.disabled = true;
+            submitBtnIcon.className = "fa-solid fa-spinner fa-spin";
+            submitBtnText.textContent = "구글 드라이브로 제출 중...";
+
+            const studentId = document.getElementById('studentId').value.trim();
+            const studentName = document.getElementById('studentName').value.trim();
+            
+            // Clean filename formatting
+            const fileName = `${studentId}_${studentName}_수학대푯값구하기.pdf`;
+            const element = document.getElementById('examContainer');
+
+            const opt = {
+                margin:       [10, 10, 10, 10],
+                filename:     fileName,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            // Hide non-print warning box temporarily
+            const guideBox = document.getElementById('guidelines-box');
+            guideBox.style.display = 'none';
+
+            try {
+                // 1. html2pdf를 이용하여 PDF를 Base64 문자열로 변환
+                const pdfWorker = html2pdf().set(opt).from(element);
+                const pdfBase64 = await pdfWorker.outputPdf('datauristring');
+
+                // 안내 박스 원래 상태로 복원
+                guideBox.style.display = '';
+
+                // 2. Apps Script 백엔드로 POST 전송 (CORS 지원을 위해 text/plain 컨텐트타입 사용)
+                const response = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({
+                        fileName: fileName,
+                        base64Data: pdfBase64
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    // 화면 가림막 처리 및 최종 완료 화면 출력
+                    document.getElementById('submittedScreen').classList.remove('hidden');
+                } else {
+                    alert('제출 실패: ' + result.message);
+                    resetSubmitButton();
+                }
+
+            } catch (err) {
+                console.error("PDF generation/upload failed:", err);
+                alert("제출 전송 중 오류가 발생했습니다. 다시 시도해 주세요.");
+                guideBox.style.display = '';
+                resetSubmitButton();
+            }
+        }
+
+        function resetSubmitButton() {
+            const submitBtn = document.getElementById('btn-submit');
+            const submitBtnText = document.getElementById('btn-submit-text');
+            const submitBtnIcon = document.getElementById('btn-submit-icon');
+
+            const currentLang = document.getElementById('langSelect').value;
+            const langData = i18n[currentLang] || i18n.ko;
+
+            submitBtn.disabled = false;
+            submitBtnIcon.className = "fa-solid fa-paper-plane";
+            submitBtnText.textContent = langData.btnSubmit;
+        }
+    </script>
+</body>
+</html>
